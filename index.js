@@ -7,6 +7,7 @@ const Port = process.env.PORT || 400;
 const app = express();
 const userRouter = require("./router/userRouter");
 const messageRouter = require("./router/messageRouter");
+const postRoute = require("./router/postRouter");
 let ejs = require("ejs");
 db();
 
@@ -17,6 +18,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/auth", userRouter);
+app.use("/api/post", postRoute);
 app.use("/api/message", messageRouter);
 
 app.get("/", (req, res) => {

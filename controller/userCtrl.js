@@ -18,22 +18,38 @@ const getUser = async (req, res) => {
     throw new Error(err);
   }
 };
+
+//register
 const createUser = async (req, res) => {
   // return console.log(req.body);
 
-  const { firstName, lastName, email, password, mobile } = req.body;
+  const {
+    firstName,
+    lastName,
+    username,
+    gender,
+    email,
+    password,
+    mobile,
+    city,
+    from,
+  } = req.body;
 
   try {
     const createUser = await new User({
       firstName: firstName,
       lastName: lastName,
+      username: username,
+      gender: gender,
       email: email,
       password: password,
       mobile: mobile,
+      from: from,
+      city: city,
     });
 
     // return console.log(createUser);
-    createUser.save();
+    await createUser.save();
 
     res.status(200).json(createUser);
   } catch (error) {
@@ -42,20 +58,10 @@ const createUser = async (req, res) => {
 };
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { firstName, lastName, email, password, mobile } = req.body;
   try {
-    const updateUser = await User.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          firstName: firstName,
-          lastName: lastName,
-          email: email,
-          mobile: mobile,
-        },
-      },
-      { new: true, runValidators: true }
-    );
+    const updateUser = await User.findByIdAndUpdate(id, {
+      $set: req.body,
+    });
 
     res.json({
       updateUser,
@@ -114,7 +120,65 @@ const login = async (req, res) => {
     throw new Error(err);
   }
 };
+//follow a user;
+const following = async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.body;
+  // return console.log();
+  try {
+    if (id !== userId) {
+      const user = await User.findById(id);
+      // return console.log(user);
 
+      if (!user.following.includes(userId)) {
+        const addFollowing = await User.updateOne({
+          $push: {
+            following: userId,
+          },
+        });
+        return res
+          .status(200)
+          .json({ addFollowing, msg: "followed with successfully" });
+      } else {
+        const unFollow = await User.updateOne({
+          $pull: {
+            following: userId,
+          },
+        });
+        return res
+          .status(200)
+          .json({ unFollow, msg: "unFollow with successfully" });
+      }
+    }
+    return res.status(401).json("you cant not follow your self");
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+const unFollow = async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.body;
+  // return console.log();
+  try {
+    if (id !== userId) {
+      const user = await User.findById(id);
+      // return console.log(user);
+      if (user.following.includes(userId)) {
+        const addFollowing = await User.updateOne({
+          $pull: {
+            following: userId,
+          },
+        });
+        return res
+          .status(200)
+          .json({ addFollowing, msg: "unFollow with successfully" });
+      }
+    }
+    return res.status(401).json("you cant not follow your self");
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 module.exports = {
   getAllUser,
   getUser,
@@ -122,4 +186,6 @@ module.exports = {
   updateUser,
   deleteUser,
   login,
+  following,
+  unFollow,
 };
