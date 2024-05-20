@@ -1,21 +1,28 @@
-const router = require("express").Router();
-const {
+import Router from "express";
+import path from "path";
+const router = Router();
+import {
   getAllUser,
-  getUser,
-  createUser,
+  // getUser,
   updateUser,
   deleteUser,
-  login,
   following,
   unFollow,
-} = require("../controller/userCtrl");
-//get
+  verifyEmail,
+} from "../controller/userCtrl.js";
+//get all user
 router.get("/", getAllUser);
-router.get("/:id", getUser);
-//post
-router.post("/", createUser);
-router.post("/login", login);
-
+//verify Email
+// router.get("/:id", getUser);
+const __dirname = path.resolve(path.dirname(""));
+router.get("/verified", async (req, res) => {
+  // res.sendFile(path.join(__dirname, "./views/build", "index.html"));
+  // res.sendFile(path.join(__dirname, "views/build/index.ejs"));
+  // return res.render("/index");
+  res.render("build/verification.ejs");
+});
+router.get("/verify/:userId/:token", verifyEmail);
+// //get user
 //update
 router.put("/:id", updateUser);
 router.put("/:id/following", following);
@@ -24,4 +31,4 @@ router.put("/:id/unFollow", unFollow);
 //delete
 router.delete("/:id", deleteUser);
 
-module.exports = router;
+export default router;

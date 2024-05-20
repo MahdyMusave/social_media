@@ -1,4 +1,5 @@
-const router = require("express").Router();
+import router from "express";
+router.Router();
 
 const {
   getAllMessage,
@@ -16,4 +17,4 @@ router.post("/", createMessage);
 router.put("/:id", putMessage);
 router.delete("/:id", deleteMessage);
 
-module.exports = router;
+export default router;

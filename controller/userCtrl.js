@@ -1,6 +1,8 @@
-const User = require("../model/userModel");
-const generateToken = require("../middleware/authMiddlerware");
-const getAllUser = async (req, res) => {
+import { User } from "../model/userModel.js";
+import Verification from "../model/emailVerification.js";
+import { compareString } from "../utils/index.js";
+
+export const getAllUser = async (req, res) => {
   try {
     const allUser = await User.find({});
     res.json(allUser);
@@ -9,54 +11,17 @@ const getAllUser = async (req, res) => {
   }
 };
 
-const getUser = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const oneUser = await User.findById({ _id: id });
-    res.json(oneUser);
-  } catch (err) {
-    throw new Error(err);
-  }
-};
+// export const getUser = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const oneUser = await User.findById({ _id: id });
+//     res.json(oneUser);
+//   } catch (err) {
+//     throw new Error(err);
+//   }
+// };
 
-//register
-const createUser = async (req, res) => {
-  // return console.log(req.body);
-
-  const {
-    firstName,
-    lastName,
-    username,
-    gender,
-    email,
-    password,
-    mobile,
-    city,
-    from,
-  } = req.body;
-
-  try {
-    const createUser = await new User({
-      firstName: firstName,
-      lastName: lastName,
-      username: username,
-      gender: gender,
-      email: email,
-      password: password,
-      mobile: mobile,
-      from: from,
-      city: city,
-    });
-
-    // return console.log(createUser);
-    await createUser.save();
-
-    res.status(200).json(createUser);
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-const updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
   const { id } = req.params;
   try {
     const updateUser = await User.findByIdAndUpdate(id, {
@@ -71,7 +36,7 @@ const updateUser = async (req, res) => {
     throw new Error(err);
   }
 };
-const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
     const deleteUser = await User.findByIdAndDelete(id);
@@ -84,44 +49,8 @@ const deleteUser = async (req, res) => {
   }
 };
 
-const login = async (req, res) => {
-  // console.log(req.body);
-  const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json("Invalid  email");
-    }
-    // return console.log(user);
-    if (user && (await user.checkPassword(password))) {
-      // console.log(user);
-      const refreshToken = generateToken(user);
-      const updateUser = await User.findByIdAndUpdate(
-        user._id,
-        {
-          refreshToken: refreshToken,
-        },
-        {
-          new: true,
-        }
-      );
-
-      res.cookie("refreshToken", refreshToken, {
-        maxAge: 72 * 60 * 60 * 1000,
-        httpOnly: true,
-      });
-      res.json({
-        updateUser,
-      });
-    } else {
-      return res.status(401).json("Invalid  email");
-    }
-  } catch (err) {
-    throw new Error(err);
-  }
-};
 //follow a user;
-const following = async (req, res) => {
+export const following = async (req, res) => {
   const { id } = req.params;
   const { userId } = req.body;
   // return console.log();
@@ -155,7 +84,7 @@ const following = async (req, res) => {
     throw new Error(error);
   }
 };
-const unFollow = async (req, res) => {
+export const unFollow = async (req, res) => {
   const { id } = req.params;
   const { userId } = req.body;
   // return console.log();
@@ -179,13 +108,99 @@ const unFollow = async (req, res) => {
     throw new Error(error);
   }
 };
-module.exports = {
-  getAllUser,
-  getUser,
-  createUser,
-  updateUser,
-  deleteUser,
-  login,
-  following,
-  unFollow,
+
+export const verifyEmail = async (req, res, next) => {
+  const { userId, token } = req.params;
+  try {
+    const verification = await Verification.findOne({ userId });
+    // return console.log(verification);
+    if (verification) {
+      const { expiresAt, token: hashedToken } = verification;
+      // return console.log(token, hashedToken);
+      if (expiresAt < Date.now()) {
+        Verification.findOneAndDelete({ userId })
+          .then(() => {
+            User.findOneAndDelete({ _id: userId }).then(() => {
+              const message = "Email time out successfully";
+              // res.redirect(
+              // `/api/users/verified?status=success&message=${message}`);
+
+              res.redirect("/api/users/verified");
+              return console.log("fail", message);
+            });
+          })
+          .catch((err) => {
+            console.log(err);
+            const message = "verification failed or link is invalid";
+            // res.redirect(`/api/users/verified?message=${message}`);
+            res.redirect("/api/users/verified");
+            return console.log(message);
+          });
+      } else {
+        //vaild token
+        // return console.log(token, hashToken);
+        compareString(token, hashedToken)
+          .then((isMatch) => {
+            if (isMatch) {
+              // return console.log(isMatch);
+              User.findByIdAndUpdate(
+                { _id: userId },
+                {
+                  verified: true,
+                },
+                {
+                  new: true,
+                }
+              )
+                .then(() => {
+                  // return console.log(result);
+                  Verification.findOneAndDelete({ userId }).then(() => {
+                    const message = "Email verified successfully";
+                    // res.redirect(
+                    //   `/api/users/verified?status=success&message=${message}`
+                    // );
+                    res.redirect("/api/users/verified");
+                    return console.log(message);
+                  });
+                })
+                .catch((err) => {
+                  console.log(err);
+                  const message = "verification failed or link is invalid";
+                  res.redirect("/api/users/verified");
+                  return console.log(message);
+                });
+            } else {
+              //invaild token
+              const message = "Invalid verification link. try agin later";
+              res.redirect("/api/users/verified");
+              return console.log(message);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+            res.redirect(`/api/users/verified?message=`);
+          });
+      }
+    } else {
+      const message = "Invalid verification link. try agin later";
+      // res.redirect(`/api/users/verified?status=error&message=${message}`);
+      res.redirect("/api/users/verified");
+      return console.log(message);
+    }
+  } catch (error) {
+    console.log(error),
+      res.status(404).json({
+        message: error.message,
+      });
+  }
 };
+// exports = {
+//   getAllUser,
+//   getUser,
+//   createUser,
+//   updateUser,
+//   deleteUser,
+//   login,
+//   following,
+//   unFollow,
+// };

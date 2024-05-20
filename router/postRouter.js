@@ -1,7 +1,7 @@
-const router = require("express").Router();
-const { Error } = require("mongoose");
-const Post = require("../model/postModel");
-const User = require("../model/userModel");
+import express from "express";
+const router = express().Router();
+import Post from "../model/postModel";
+import User from "../model/userModel";
 router.get("/", async (req, res) => {
   try {
     const posts = await Post.find({});
@@ -105,4 +105,4 @@ router.get("/timeLine/all", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

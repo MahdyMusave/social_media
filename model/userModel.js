@@ -1,31 +1,33 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+import mongoose, { Schema } from "mongoose";
+import bcrypt from "bcrypt";
 const userSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
-      required: true,
+      required: [true, "firstName is required"],
     },
     lastName: {
       type: String,
-      required: true,
+      required: [true, "firstName is required"],
     },
     username: {
       type: String,
       min: 5,
       max: 20,
-      required: true,
+      required: [true, "username is required"],
       unique: true,
     },
     email: {
       type: String,
       max: 50,
-      required: true,
+      required: [true, "email is required"],
       unique: true,
     },
     password: {
       type: String,
-      required: true,
+      required: [true, "password is required"],
+      minlength: [6, "password must be 6 character"],
+      select: true,
     },
     gender: {
       type: String,
@@ -39,14 +41,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    followers: {
-      type: Array,
-      default: [],
-    },
-    following: {
-      type: Array,
-      default: [],
-    },
+
     mobile: {
       type: Number,
       required: true,
@@ -55,21 +50,22 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "user",
     },
-    description: {
-      type: String,
-    },
-    city: {
-      type: String,
-      max: 50,
-    },
-    from: {
-      type: String,
-      max: 50,
-    },
+
     relationShip: {
       type: Number,
       enum: [1, 2, 3, 4],
     },
+    location: { type: String },
+    profileUrl: { type: String },
+    profession: { type: String },
+    friends: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    views: [{ type: String }],
+    verified: { type: Boolean, default: false },
     refreshToken: {
       token: String,
     },
@@ -96,6 +92,6 @@ userSchema.methods.checkPassword = async function (password, callback) {
 };
 //  return await bcrypt.compare(enteredPassword, this.password);
 
-module.exports = mongoose.model("User", userSchema);
+export const User = mongoose.model("User", userSchema);
 
 //  module.exports = userModel;

@@ -1,12 +1,9 @@
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
-const generateToken = (user) => {
+import jwt from "jsonwebtoken";
+
+export const generateToken = (user) => {
   const payload = {
     userId: user.id,
     firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    mobile: user.mobile,
   };
   const option = { expiresIn: "2h" };
 
@@ -14,4 +11,3 @@ const generateToken = (user) => {
   // console.log(token);
   return token;
 };
-module.exports = generateToken;

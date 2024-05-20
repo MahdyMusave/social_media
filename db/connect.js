@@ -1,11 +1,11 @@
-const mongoose = require("mongoose");
-//Set up default mongoose connection
+import mongoose from "mongoose";
+
 const dbConnect = async () => {
   try {
-    let mongoDB = await mongoose.connect("mongodb://127.0.0.1/facebook");
+    let connection = await mongoose.connect("mongodb://127.0.0.1/facebook");
     console.log("Database Connected");
   } catch (err) {
     console.log(err);
   }
 };
-module.exports = dbConnect;
+export default dbConnect;

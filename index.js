@@ -1,29 +1,39 @@
-const express = require("express");
-const db = require("./db/connect");
-require("dotenv").config();
-const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
-const Port = process.env.PORT || 400;
-const app = express();
-const userRouter = require("./router/userRouter");
-const messageRouter = require("./router/messageRouter");
-const postRoute = require("./router/postRouter");
-let ejs = require("ejs");
-db();
+import express from "express";
+import dotenv from "dotenv";
+import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import cors from "cors";
+import morgan from "morgan";
+import ejs from "ejs";
+import dbConnect from "./db/connect.js";
+import errorMiddleware from "./middleware/errorMiddleware.js";
+import path from "path";
+import AllRouter from "./router/index.js";
+import { fileURLToPath } from "url";
+const __dirname = path.resolve(path.dirname(""));
 
+dotenv.config();
+const app = express();
+const Port = process.env.PORT || 400;
+dbConnect();
+
+app.set(express.static(path.join(__dirname, "views/build")));
 app.set("view engine", "ejs");
+app.use(helmet());
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.json());
 
-app.use("/api/auth", userRouter);
-app.use("/api/post", postRoute);
-app.use("/api/message", messageRouter);
+app.use(express.json({ limit: "10mb" }));
+app.use(morgan("dev"));
 
-app.get("/", (req, res) => {
-  res.render("index");
-});
+app.use("/", AllRouter);
+app.use(errorMiddleware);
+// app.get("/", (req, res) => {
+//   res.render("build/verification.ejs");
+// });
 
 app.listen(Port, () => {
   // console.log(res);
