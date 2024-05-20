@@ -125,7 +125,7 @@ export const verifyEmail = async (req, res, next) => {
               // res.redirect(
               // `/api/users/verified?status=success&message=${message}`);
 
-              res.redirect("/api/users/verified");
+              // res.redirect("/api/users/verified");
               return console.log("fail", message);
             });
           })
@@ -133,7 +133,7 @@ export const verifyEmail = async (req, res, next) => {
             console.log(err);
             const message = "verification failed or link is invalid";
             // res.redirect(`/api/users/verified?message=${message}`);
-            res.redirect("/api/users/verified");
+            // res.redirect("/api/users/verified");
             return console.log(message);
           });
       } else {
@@ -156,36 +156,38 @@ export const verifyEmail = async (req, res, next) => {
                   // return console.log(result);
                   Verification.findOneAndDelete({ userId }).then(() => {
                     const message = "Email verified successfully";
-                    // res.redirect(
-                    //   `/api/users/verified?status=success&message=${message}`
-                    // );
-                    res.redirect("/api/users/verified");
-                    return console.log(message);
+                    // console.log(message);
+                    return res.redirect(
+                      `/api/users/verified?status=success&message=${message}`
+                    );
+                    // res.redirect("/api/users/verified");
                   });
                 })
                 .catch((err) => {
                   console.log(err);
                   const message = "verification failed or link is invalid";
-                  res.redirect("/api/users/verified");
+                  // res.redirect("/api/users/verified");
                   return console.log(message);
                 });
             } else {
               //invaild token
-              const message = "Invalid verification link. try agin later";
-              res.redirect("/api/users/verified");
+              const message = "Invalid verification link. 1 try agin later";
+              // res.redirect("/api/users/verified");
               return console.log(message);
             }
           })
           .catch((err) => {
-            console.log(err);
+            return console.log(err);
             res.redirect(`/api/users/verified?message=`);
           });
       }
     } else {
-      const message = "Invalid verification link. try agin later";
-      // res.redirect(`/api/users/verified?status=error&message=${message}`);
-      res.redirect("/api/users/verified");
-      return console.log(message);
+      const message = "Invalid verification link. 3 try agin later";
+      //  return console.log(message);
+      return res.redirect(
+        `/api/users/verified?status=error&message=${message}`
+      );
+      // res.redirect("/api/users/verified");
     }
   } catch (error) {
     console.log(error),

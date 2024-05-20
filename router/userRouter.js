@@ -16,10 +16,8 @@ router.get("/", getAllUser);
 // router.get("/:id", getUser);
 const __dirname = path.resolve(path.dirname(""));
 router.get("/verified", async (req, res) => {
-  // res.sendFile(path.join(__dirname, "./views/build", "index.html"));
-  // res.sendFile(path.join(__dirname, "views/build/index.ejs"));
-  // return res.render("/index");
-  res.render("build/verification.ejs");
+  // return console.log(req.query);
+  res.render("build/verification.ejs", { query: req.query });
 });
 router.get("/verify/:userId/:token", verifyEmail);
 // //get user
