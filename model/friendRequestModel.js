@@ -6,9 +6,10 @@ const friendRequestSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+
     requestFrom: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Post",
+      ref: "User",
     },
     requestStatus: {
       type: String,
@@ -19,5 +20,5 @@ const friendRequestSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-const friendRequest = mongoose.model("friendRequest", friendRequestSchema);
-export default friendRequest;
+const FriendRequest = mongoose.model("FriendRequest", friendRequestSchema);
+export default FriendRequest;

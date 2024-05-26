@@ -2,14 +2,8 @@ import mongoose, { Schema } from "mongoose";
 
 const commentSchema = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    postId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Post",
-    },
+    userId: { type: Schema.Types.ObjectId, ref: "User" },
+    postId: { type: Schema.Types.ObjectId, ref: "Post" },
     comment: {
       type: String,
       required: true,
@@ -31,16 +25,13 @@ const commentSchema = new mongoose.Schema(
           type: Date,
           default: Date.now,
         },
-        updatedAt: {
-          type: Date,
-          default: Date.now,
-        },
-        likes: {
-          type: Array,
-          default: [],
-        },
+        likes: [{ type: String }],
       },
     ],
+    likes: {
+      type: Array,
+      default: [],
+    },
   },
   {
     timestamps: true,

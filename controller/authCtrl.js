@@ -39,14 +39,14 @@ export const register = async (req, res, next) => {
       next("Email Address already exists ");
       return;
     }
-    const hashPassword = await hashString(password);
+    // const hashPassword = await hashString(password);
     const createUser = await new User({
       firstName: firstName,
       lastName: lastName,
       username: username,
       gender: gender,
       email: email,
-      password: hashPassword,
+      password: password,
       mobile: mobile,
       from: from,
       city: city,
@@ -56,10 +56,16 @@ export const register = async (req, res, next) => {
     //send email verification to user
     sendVerificationEmail(createUser, res);
 
-    res.status(200).json(createUser);
+    res.status(200).json({
+      message: "User Created Successfully",
+      success: true,
+    });
   } catch (error) {
-    console.log(error);
-    res.status(404).json({ message: error.message });
+    console.log(error.message);
+    res.status(404).json({
+      message: error.message,
+      success: false,
+    });
   }
 };
 
@@ -113,8 +119,7 @@ export const login = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: "Login with successFully",
-      updateUser,
-      tokenId: refreshToken._id,
+      user,
       refreshToken,
     });
   } catch (err) {

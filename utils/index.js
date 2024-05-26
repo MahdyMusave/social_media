@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import JWT from "jsonwebtoken";
 
 export const hashString = async (useValue) => {
+  // return console.log(useValue);
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(useValue, salt);
   return hashedPassword;
@@ -15,7 +16,7 @@ export const compareString = async (userPassword, password) => {
 };
 
 export const createToken = async (id) => {
-  return JWT.sign({ userId: id }, process.env.SECRETKEY, {
+  return JWT.sign({ userId: id }, process.env.JWT_SECRET, {
     expiresIn: "1d ",
   });
 };
